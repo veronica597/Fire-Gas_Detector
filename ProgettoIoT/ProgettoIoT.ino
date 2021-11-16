@@ -1,19 +1,26 @@
+
+#include <MQ2.h>
+
+
+
+
 int sogliaGas = 400;
-int sogliaFiamma =350;
+int sogliaFiamma =1000;
 
 void setup() {
   
 pinMode (8, OUTPUT); // direzione del pin buzzer
 //pinMode (12, OUTPUT); // direzione del pin led rosso
 //pinMode (11, OUTPUT);  // direzione del pin led verde
-//pinMode ( A5, INPUT); // leggo dati in ingresso dal sensore di gas MQ-2
+pinMode ( A1, INPUT); // leggo dati in ingresso dal sensore di gas MQ-2
 Serial.begin (9600); // avvio del monitor seriale
 }
  
 void loop() {
 int fiamma = analogRead(A0); // rilevo il valore da A0
-int gas = analogRead (A5); // rilevo il valore da A5
+int gas = analogRead (A1); // rilevo il valore da A5
 
+Serial.print("valore del KY-026: ");
 Serial.println(fiamma); // stampo su monitor seriale
 
 Serial.print("valore del MQ-2: ");
