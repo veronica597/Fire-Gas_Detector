@@ -1,6 +1,6 @@
 
 #include <MQ2.h>
-int Analog_Input = A1;
+int Analog_Input = A0;
 int lpg, co, smoke;
 
 MQ2 mq2(Analog_Input);
