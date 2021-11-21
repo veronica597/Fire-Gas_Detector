@@ -17,7 +17,7 @@ Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 //variabili per lettura digitale KY-026:
 int digitalPin = 2; // KY-026 digital interface
-int digitalVal;
+int digitalVal=0;
 
 //variabili per lettura digitale MQ-2:
 int digitalPinMQ2 = 4; //MQ-2 digital interface
@@ -60,14 +60,16 @@ void loop() {
   digitalVal = digitalRead(digitalPin);
   Serial.println("lettura digitale KY-026: ");
   Serial.println(digitalVal);
+  delay(1000);
 
   /*lettura dati digitali dell'MQ-2*/
   digitalValMQ2 = digitalRead(digitalPinMQ2);
   Serial.println("lettura digitale MQ-2: ");
   Serial.println(digitalValMQ2);
+  delay(1000);
 
   /*pensare se vogliamo implementare un controllo del funzionamento  corretto KY-026 e MQ-2 verificando se questi suonano in corrispondenza di un aumento di temperatura, se questa non aumenta potrebbe esserci un malfunzionamento di uno dei due*/
-  if (digitalVal == HIGH && digitalValMQ2 == HIGH) {// pensare eventualmente ad un AND e non un OR
+  if (digitalVal == HIGH || digitalValMQ2 == LOW) {// pensare eventualmente ad un AND e non un OR
     Serial.println("E' stato rilevato un pericolo dai sensori");
 
     /*eseguo le letture della composizione in ppm dell'MQ-2*/
@@ -76,6 +78,8 @@ void loop() {
     co = mq2.readCO();
     smoke = mq2.readSmoke();
 
+    
+    
     /*acquisizione valori tempoeratura/umidità*/
     float t = sht31.readTemperature();
     Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
@@ -85,9 +89,9 @@ void loop() {
     sound();
     cambioLed();
   }
-  else {
-    Serial.println("Nessun pericolo è stato rilevato dai sensori");
-    digitalWrite(11, HIGH); //parto con led verde acceso
+  else {// ky low, mq-2 alto
+   Serial.println("Nessun pericolo è stato rilevato dai sensori");
+   digitalWrite(11, HIGH); //parto con led verde acceso
   }
 }
 
