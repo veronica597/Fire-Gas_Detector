@@ -1,3 +1,25 @@
+/*parte per inviare dati al raspberry tramite MQTT*/
+#include <ArduinoMqttClient.h>
+#include <WiFiNINA.h>
+#include "WiFi_config.h"
+char ssid[] = SECRET_SSID;     // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password
+
+WiFiClient wifiClient;
+MqttClient mqttClient(wifiClient);
+
+const char broker[] = "test.mosquitto.org";
+int        port     = 1883;
+const char topic[]  = "real_unique_topic";
+const char topic2[]  = "real_unique_topic_2";
+const char topic3[]  = "real_unique_topic_3";
+
+//set interval for sending messages (milliseconds)
+const long interval = 8000;
+unsigned long previousMillis = 0;
+
+int count = 0;
+/*fine parte per inviare dati a raspberry tramite MQTT*/
 
 #include <MQ2.h>
 #include <Arduino.h>
@@ -10,6 +32,12 @@ int Analog_Input = A0; // pin A0 dell'MQ2
 int lpg, co, smoke;
 MQ2 mq2(Analog_Input);
 
+//variabili per lettura digitale MQ-2:
+int digitalPinMQ2 = 4; //MQ-2 digital interface
+int digitalValMQ2;
+
+
+
 //variabili per SHT31D:
 bool enableHeater = false;
 uint8_t loopCnt = 0;
@@ -19,15 +47,44 @@ Adafruit_SHT31 sht31 = Adafruit_SHT31();
 int digitalPin = 2; // KY-026 digital interface
 int digitalVal=0;
 
-//variabili per lettura digitale MQ-2:
-int digitalPinMQ2 = 4; //MQ-2 digital interface
-int digitalValMQ2;
 
 
-//int sogliaGas = 350;
-//int sogliaFiamma =50;
 
 void setup() {
+  Serial.begin (9600); // avvio del monitor seriale
+  
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+
+  /*tentativo di connessione alla rete wifi e al broker mqtt*/ 
+  Serial.print("Attempting to connect to WPA SSID: ");
+  Serial.println(ssid);
+  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
+    // failed, retry
+    Serial.print(".");
+    delay(5000);
+  }
+
+  Serial.println("You're connected to the network");
+  Serial.println();
+
+  Serial.print("Attempting to connect to the MQTT broker: ");
+  Serial.println(broker);
+
+  if (!mqttClient.connect(broker, port)) {
+    Serial.print("MQTT connection failed! Error code = ");
+    Serial.println(mqttClient.connectError());
+
+    while (1);
+  }
+
+  Serial.println("You're connected to the MQTT broker!");
+  Serial.println();
+ 
+  /**/
+ 
 
   pinMode (Analog_Input, INPUT); //rx dati analogici dal pin dell'MQ-2
   pinMode(digitalPinMQ2, INPUT); //rx dati digitali dal pin dell'MQ-2
@@ -38,7 +95,6 @@ void setup() {
   pinMode (12, OUTPUT); // tx comandi al pin del led rosso
   pinMode (11, OUTPUT);  // tx comandi al pin del led verde
 
-  Serial.begin (9600); // avvio del monitor seriale
 
   /*esegue il setup dello sketch per misurare temperatura e umidità*/
   Serial.println("SHT31 test");
