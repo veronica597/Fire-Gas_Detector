@@ -1,2 +1,2 @@
-#define SECRET_SSID "iPhone di Vero"//Vodafone-45816537
-#define SECRET_PASS "veronica"//ssbydwlehc7y8cf
+#define SECRET_SSID "Vodafone-45816537" 
+#define SECRET_PASS "ssbydwlehc7y8cf" 

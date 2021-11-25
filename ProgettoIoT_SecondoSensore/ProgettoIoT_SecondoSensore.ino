@@ -1,3 +1,9 @@
+
+
+
+
+
+
 /*parte per inviare dati al raspberry tramite MQTT*/
 #include <ArduinoMqttClient.h>
 #include <WiFiNINA.h>
@@ -24,7 +30,10 @@ int count = 0;
 #include <MQ2.h>
 #include <Arduino.h>
 #include <Wire.h>
+
 #include "Adafruit_SHT31.h"
+
+
 
 
 //variabili per lettura analogica MQ-2:
@@ -39,6 +48,8 @@ int digitalValMQ2;
 
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
+
+
 //variabili per lettura digitale KY-026:
 int digitalPin = 2; // KY-026 digital interface
 int digitalVal = 0;
@@ -46,6 +57,7 @@ int digitalVal = 0;
 
 void setup() {
   Serial.begin (9600); // avvio del monitor seriale
+ 
 
 
   /*tentativo di connessione alla rete wifi e al broker mqtt*/
@@ -87,11 +99,12 @@ void setup() {
 
 
   /*esegue il setup dello sketch per misurare temperatura e umidità*/
-  Serial.println("SHT31 test");
-  if (!sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
-    Serial.println("Couldn't find SHT31");
-    while (1) delay(1);
-  }
+//  Serial.println("SHT31 test");
+//  if (!sht31.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
+//    Serial.println("Couldn't find SHT31");
+//    while (1) delay(1);
+//  }
+  
 
   mq2.begin();
 }
@@ -140,7 +153,7 @@ void loop() {
       Serial.println(topic);
 
       mqttClient.beginMessage(topic);
-      mqttClient.println("PERICOLO RILEVATO DA SENSORE 1");
+      mqttClient.println("PERICOLO RILEVATO DA SENSORE 2");
       mqttClient.endMessage();
 
 //
@@ -154,25 +167,28 @@ void loop() {
       sound();
       cambioLed();
 
-    
 
     /*acquisizione valori tempoeratura/umidità*/
-    float t = sht31.readTemperature();
-    Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
-    float h = sht31.readHumidity();
-    Serial.print("Hum. % = "); Serial.println(h);
+
+   
+
+    
+//    float t = sht31.readTemperature();
+//    Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
+//    float h = sht31.readHumidity();
+//    Serial.print("Hum. % = "); Serial.println(h);
 
     }
 
   
   else {// ky low, mq-2 alto
-    //Serial.println("Nessun pericolo è stato rilevato dai sensori");
+    
 
     Serial.print("Sending message to topic2: ");
     Serial.println(topic2);
 
     mqttClient.beginMessage(topic2);
-    mqttClient.println("NESSUN PERICOLO RILEVATO DA SENSORE 1");
+    mqttClient.println("NESSUN PERICOLO RILEVATO DA SENSORE 2");
     mqttClient.endMessage();
 
     digitalWrite(11, HIGH); //parto con led verde acceso
