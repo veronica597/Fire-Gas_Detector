@@ -1,4 +1,4 @@
-/*parte per inviare dati al raspberry tramite MQTT*/
+/**parte per inviare dati al raspberry tramite MQTT*/
 #include <ArduinoMqttClient.h>
 #include <WiFiNINA.h>
 #include "WiFi_config.h"
