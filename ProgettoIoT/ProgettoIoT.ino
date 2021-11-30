@@ -8,13 +8,13 @@ char pass[] = SECRET_PASS;    // your network password
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient); // client MQTT
 
-const char broker[] = "192.168.1.6";//
+const char broker[] = "192.168.1.7";// ip broker mqtt
 int        port     = 1883;
 const char topic[]  = "fire_warning";
 const char topic2[]  = "lectures";
-//const char topic3[]  = "real_unique_topic_3";
 
-//set interval for sending messages (milliseconds) to MQTT broker
+
+//fisso intervallo per inviare dati all'MQTT broker
 const long interval = 4000;
 unsigned long previousMillis = 0;
 
@@ -28,7 +28,7 @@ int count = 0;
 
 
 //variabili per lettura analogica MQ-2:
-int Analog_Input = A0; // pin A0 dell'MQ2
+int Analog_Input = A0; // pin A0 Arduino
 int lpg = 0, co = 0, smoke = 0;
 MQ2 mq2(Analog_Input);
 
@@ -36,7 +36,7 @@ MQ2 mq2(Analog_Input);
 int digitalPinMQ2 = 4; //MQ-2 digital interface
 int digitalValMQ2;
 
-
+// variabili per lettura SHT-31D:
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 //variabili per lettura digitale KY-026:
@@ -114,23 +114,22 @@ void loop() {
 
     /*lettura dati digitali del KY-026*/
     digitalVal = digitalRead(digitalPin);
-    Serial.println("lettura digitale KY-026: ");
+    Serial.println("digital lecture of KY-026: ");
     Serial.println(digitalVal);
     delay(4000);
 
     /*lettura dati digitali dell'MQ-2*/
     digitalValMQ2 = digitalRead(digitalPinMQ2);
-    Serial.println("lettura digitale MQ-2: ");
+    Serial.println("digital lecture of MQ-2: ");
     Serial.println(digitalValMQ2);
     delay(4000);
 
 
-    if (digitalVal == HIGH || digitalValMQ2 == LOW) {// pensare eventualmente ad un AND e non un OR
+    if (digitalVal == HIGH || digitalValMQ2 == LOW) {
       Serial.println("E' stato rilevato un pericolo dai sensori");
 
-
       /*eseguo le letture della composizione in ppm dell'MQ-2*/
-      float* values = mq2.read(true); //set it false if you don't want to print the values in the Serial
+      float* values = mq2.read(true); 
       lpg = mq2.readLPG();
       co = mq2.readCO();
       smoke = mq2.readSmoke();
@@ -143,43 +142,40 @@ void loop() {
       mqttClient.println("PERICOLO RILEVATO DA SENSORE 1");
       mqttClient.endMessage();
 
-//
-//      mqttClient.beginMessage(topic);
-//      mqttClient.println("Qualità aria: ");
-//      mqttClient.println(lpg);
-//      mqttClient.println(co);
-//      mqttClient.println(smoke);
-//      mqttClient.endMessage();
-      
+
       sound();
-      cambioLed();
+      changeLed();
 
-    
 
-    /*acquisizione valori tempoeratura/umidità*/
-    float t = sht31.readTemperature();
-    Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
-    float h = sht31.readHumidity();
-    Serial.print("Hum. % = "); Serial.println(h);
+
+
+      /*acquisizione valori tempoeratura/umidità*/
+      float t = sht31.readTemperature();
+      Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
+      float h = sht31.readHumidity();
+      Serial.print("Hum. % = "); Serial.println(h);
 
     }
 
-  
-  else {// ky low, mq-2 alto
-    //Serial.println("Nessun pericolo è stato rilevato dai sensori");
 
-    Serial.print("Sending message to topic2: ");
-    Serial.println(topic2);
+    else {// ky low, mq-2 alto
 
-    mqttClient.beginMessage(topic2);
-    mqttClient.println("NESSUN PERICOLO RILEVATO DA SENSORE 1");
-    mqttClient.endMessage();
+      Serial.print("Sending message to topic2: ");
+      Serial.println(topic2);
 
-    digitalWrite(11, HIGH); //parto con led verde acceso
+      mqttClient.beginMessage(topic2);
+      mqttClient.println("NESSUN PERICOLO RILEVATO DA SENSORE 1");
+      mqttClient.endMessage();
+
+      digitalWrite(11, HIGH); //parto con led verde acceso
+    }
+
   }
-  
-  }
+
+
 }
+
+
 
 
 
@@ -187,7 +183,7 @@ void loop() {
 //funzioni del codice:
 
 /* funzione per scambiare i led da verde a rosso e farlo lampeggiare*/
-void cambioLed() {
+void changeLed() {
   digitalWrite (11, LOW); // spengo led verde
   digitalWrite (12, HIGH); // accendo led rosso
 

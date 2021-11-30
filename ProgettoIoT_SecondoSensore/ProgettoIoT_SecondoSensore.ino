@@ -14,7 +14,7 @@ char pass[] = SECRET_PASS;    // your network password
 WiFiClient wifiClient;
 MqttClient mqttClient(wifiClient); // client MQTT
 
-const char broker[] = "192.168.1.6";//
+const char broker[] = "192.168.1.7";
 int        port     = 1883;
 const char topic[]  = "fire_warning";
 const char topic2[]  = "lectures";
@@ -46,6 +46,7 @@ int digitalPinMQ2 = 4; //MQ-2 digital interface
 int digitalValMQ2;
 
 
+// variabili per lettura SHT-31D:
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 
@@ -156,13 +157,7 @@ void loop() {
       mqttClient.println("PERICOLO RILEVATO DA SENSORE 2");
       mqttClient.endMessage();
 
-//
-//      mqttClient.beginMessage(topic);
-//      mqttClient.println("Qualità aria: ");
-//      mqttClient.println(lpg);
-//      mqttClient.println(co);
-//      mqttClient.println(smoke);
-//      mqttClient.endMessage();
+
       
       sound();
       cambioLed();
